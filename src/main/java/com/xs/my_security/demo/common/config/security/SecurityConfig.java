@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.xs.my_security.demo.common.bean.ResponseResult;
 import com.xs.my_security.demo.common.config.redis.RedisKeys;
 import com.xs.my_security.demo.common.config.redis.RedisUtils;
+import com.xs.my_security.demo.common.util.NetUtil;
 import com.xs.my_security.demo.entity.Resource;
 import com.xs.my_security.demo.entity.User;
 import com.xs.my_security.demo.service.UserService;
@@ -45,8 +46,17 @@ public class SecurityConfig implements WebMvcConfigurer {
         return new SecurityInterceptor();
     }
 
+    @Bean
+    public IpInterceptor getIpInterceptor() {
+        return new IpInterceptor();
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        //添加限流拦截器
+        InterceptorRegistration interceptorRegistration = registry.addInterceptor(getIpInterceptor());
+        interceptorRegistration.addPathPatterns("/**");
+        //添加权限拦截器
         InterceptorRegistration addInterceptor = registry.addInterceptor(getSecurityInterceptor());
         //排除的路径
         addInterceptor.excludePathPatterns("/error/**");
@@ -131,6 +141,34 @@ public class SecurityConfig implements WebMvcConfigurer {
                 log.error("获取权限信息失败");
                 writerResponse(response,-2,"获取权限信息失败");
                 return false;
+            }
+        }
+    }
+
+    private class IpInterceptor extends HandlerInterceptorAdapter{
+
+        /**
+         * 1秒访问超过10次拒绝访问
+         * @param request
+         * @param response
+         * @param handler
+         * @return
+         */
+        @Override
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+            String ipAddress = NetUtil.getIpAddress(request);
+            String key = RedisKeys.getVisitIpKey(ipAddress);
+            Object o = redisUtils.get(key);
+            if (o==null){
+                redisUtils.set(key,1,1);
+                return true;
+            }else if ((int)o>10){
+                log.error("ip:"+ipAddress+"拒绝访问");
+                writerResponse(response,-200,"访问频繁，拒绝访问");
+                return false;
+            }else {
+                redisUtils.incr(key,1);
+                return true;
             }
         }
     }

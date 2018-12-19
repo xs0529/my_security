@@ -17,6 +17,10 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class RequestUtil {
 
+    /**
+     * 全局获取用户信息
+     * @return
+     */
     public static User getCurrentUser(){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         User user = (User)request.getAttribute("user");

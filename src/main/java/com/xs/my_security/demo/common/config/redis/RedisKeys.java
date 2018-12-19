@@ -46,4 +46,31 @@ public class RedisKeys {
     public static String getUserResourceKey(String username){
         return "resource:user:"+username;
     }
+
+    /**
+     * user 登录错误次数 key
+     * @param username
+     * @return
+     */
+    public static String getUserLoginErrorCountKey(String username){
+        return "login:error:count:"+username;
+    }
+
+    /**
+     * user 多少分钟之后能够登录 key
+     * @param username
+     * @return
+     */
+    public static String getUserLoginErrorTimeKey(String username){
+        return "login:error:time:"+username;
+    }
+
+    /**
+     * user 指定ip访问的次数 key
+     * @param ip
+     * @return
+     */
+    public static String getVisitIpKey(String ip){
+        return "visit:ip:count:"+ip;
+    }
 }

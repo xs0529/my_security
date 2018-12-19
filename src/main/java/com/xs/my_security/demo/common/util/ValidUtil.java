@@ -14,6 +14,11 @@ import org.springframework.validation.BindingResult;
  */
 public class ValidUtil {
 
+    /**
+     * 统一参数校验返回错误信息方法
+     * @param bindingResult
+     * @return
+     */
     public synchronized static ResponseResult VaildMessage(BindingResult bindingResult){
         StringBuffer stringBuffer = new StringBuffer();
         bindingResult.getAllErrors().forEach(objectError -> {
